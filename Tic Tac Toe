@@ -1,0 +1,97 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+public class TicTacToe : MonoBehaviour
+{
+    public Text[] buttonList;   // Array for board buttons
+    public Text infoText;       // Display info about the game state
+    private string currentPlayer;  // Track the current player
+    private int moveCount;         // Track moves to check for a draw
+
+    private void Awake()
+    {
+        SetGameControllerReferenceOnButtons();
+        StartNewGame();
+    }
+
+    void SetGameControllerReferenceOnButtons()
+    {
+        foreach (Text button in buttonList)
+        {
+            button.GetComponentInParent<Button>().onClick.AddListener(() => PlayerMove(button));
+        }
+    }
+
+    public void StartNewGame()
+    {
+        currentPlayer = "X";    // X always starts
+        moveCount = 0;          // Reset move count
+        infoText.text = currentPlayer + "'s Turn";
+
+        foreach (Text button in buttonList)
+        {
+            button.text = "";
+            button.GetComponentInParent<Button>().interactable = true;
+        }
+    }
+
+    public void PlayerMove(Text buttonText)
+    {
+        buttonText.text = currentPlayer;
+        buttonText.GetComponentInParent<Button>().interactable = false;
+        moveCount++;
+
+        if (CheckForWinner())
+        {
+            EndGame(currentPlayer + " Wins!");
+        }
+        else if (moveCount >= 9)
+        {
+            EndGame("Draw!");
+        }
+        else
+        {
+            SwitchPlayer();
+        }
+    }
+
+    void SwitchPlayer()
+    {
+        currentPlayer = (currentPlayer == "X") ? "O" : "X";
+        infoText.text = currentPlayer + "'s Turn";
+    }
+
+    bool CheckForWinner()
+    {
+        // Winning combinations
+        int[,] winConditions = new int[,] {
+            { 0, 1, 2 }, { 3, 4, 5 }, { 6, 7, 8 }, // Rows
+            { 0, 3, 6 }, { 1, 4, 7 }, { 2, 5, 8 }, // Columns
+            { 0, 4, 8 }, { 2, 4, 6 }               // Diagonals
+        };
+
+        for (int i = 0; i < winConditions.GetLength(0); i++)
+        {
+            int a = winConditions[i, 0];
+            int b = winConditions[i, 1];
+            int c = winConditions[i, 2];
+
+            if (buttonList[a].text == currentPlayer &&
+                buttonList[b].text == currentPlayer &&
+                buttonList[c].text == currentPlayer)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void EndGame(string result)
+    {
+        infoText.text = result;
+        foreach (Text button in buttonList)
+        {
+            button.GetComponentInParent<Button>().interactable = false;
+        }
+    }
+}
